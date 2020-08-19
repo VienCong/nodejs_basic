@@ -11,6 +11,14 @@ const {
     ErrorModel
 } = require('../model/resModel')
 
+// 统一登录验证函数
+const loginCheck = (req)=> {
+    if (!req.session.username) {
+        return Promise.resolve(new ErrorModel('登录失败'))
+    }
+    
+}
+
 const handleBlogRouter = (req, res) => {
     const method = req.method
     const id = req.query.id
@@ -35,6 +43,10 @@ const handleBlogRouter = (req, res) => {
 
     // 更新博客
     if (method === 'POST' && req.path === '/api/blog/update') {
+        const loginCheckResult = loginCheck(req)
+        if(loginCheckResult) {
+            return loginCheck
+        }
         const result = upDateBlog(id, req.body)
         return result.then(val => {
             if (val) {
@@ -46,7 +58,11 @@ const handleBlogRouter = (req, res) => {
 
     // 新建博客
     if (method === 'POST' && req.path === '/api/blog/new') {
-        const author = 'zhangsan' // TODO
+        const loginCheckResult = loginCheck(req)
+        if(loginCheckResult) {
+            return loginCheck
+        }
+        const author = req.session.username
         req.body.author = author
         const result = newBlog(req.body)
         return result.then(data => {
@@ -56,7 +72,11 @@ const handleBlogRouter = (req, res) => {
 
     // 删除博客
     if (method === 'POST' && req.path === '/api/blog/del') {
-        const author = 'zhangsan' // TODO
+        const loginCheckResult = loginCheck(req)
+        if(loginCheckResult) {
+            return loginCheck 
+        }
+        const author = req.session.username
         req.body.author = author
         const result = delBlog(id, author)
         return result.then(val => {
